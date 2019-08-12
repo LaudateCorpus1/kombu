@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-kombu.async.semaphore
-=====================
+kombu.asynchronous.semaphore
+===========================
 
 Semaphores and concurrency primitives.
 

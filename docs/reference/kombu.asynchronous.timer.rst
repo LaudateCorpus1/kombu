@@ -1,11 +1,11 @@
 ==========================================================
- Semaphores - kombu.async.semaphore
+ Timer - kombu.asynchronous.timer
 ==========================================================
 
 .. contents::
     :local:
-.. currentmodule:: kombu.async.semaphore
+.. currentmodule:: kombu.asynchronous.timer
 
-.. automodule:: kombu.async.semaphore
+.. automodule:: kombu.asynchronous.timer
     :members:
     :undoc-members:

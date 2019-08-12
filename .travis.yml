@@ -1,19 +1,10 @@
 language: python
+dist: bionic
 python:
-    - 2.6
     - 2.7
-    - 3.3
-    - 3.4
-    - pypy
+    - 3.7
 before_install:
     - |
-      deactivate
-      if python --version |& grep PyPy; then
-        sudo apt-add-repository --yes ppa:pypy/ppa
-        sudo apt-get update
-        sudo apt-get install pypy
-        source ~/virtualenv/pypy/bin/activate
-      fi
       python --version
       uname -a
       lsb_release -a

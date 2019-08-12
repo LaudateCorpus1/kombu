@@ -23,11 +23,11 @@
     kombu.pools
     kombu.abstract
     kombu.syn
-    kombu.async
-    kombu.async.hub
-    kombu.async.semaphore
-    kombu.async.timer
-    kombu.async.debug
+    kombu.asynchronous
+    kombu.asynchronous.hub
+    kombu.asynchronous.semaphore
+    kombu.asynchronous.timer
+    kombu.asynchronous.debug
     kombu.transport
     kombu.transport.pyamqp
     kombu.transport.librabbitmq

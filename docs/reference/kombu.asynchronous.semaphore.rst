@@ -1,11 +1,11 @@
 ==========================================================
- Event Loop - kombu.async
+ Semaphores - kombu.asynchronous.semaphore
 ==========================================================
 
 .. contents::
     :local:
-.. currentmodule:: kombu.async
+.. currentmodule:: kombu.asynchronous.semaphore
 
-.. automodule:: kombu.async
+.. automodule:: kombu.asynchronous.semaphore
     :members:
     :undoc-members:

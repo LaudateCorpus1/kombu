@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-kombu.async.hub
-===============
+kombu.asynchronous.hub
+=====================
 
 Event loop implementation.
 
@@ -284,7 +284,7 @@ class Hub(object):
                 try:
                     events = poll(poll_timeout)
                 except ValueError:  # Issue 882
-                    raise StopIteration()
+                    return
 
                 for fd, event in events or ():
                     general_error = False

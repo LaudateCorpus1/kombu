@@ -1,11 +1,11 @@
 ==========================================================
- Event Loop Implementation - kombu.async.hub
+ Debugging Utils - kombu.asynchronous.debug
 ==========================================================
 
 .. contents::
     :local:
-.. currentmodule:: kombu.async.hub
+.. currentmodule:: kombu.asynchronous.debug
 
-.. automodule:: kombu.async.hub
+.. automodule:: kombu.asynchronous.debug
     :members:
     :undoc-members:

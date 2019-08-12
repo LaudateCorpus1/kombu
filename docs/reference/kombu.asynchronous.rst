@@ -1,11 +1,11 @@
 ==========================================================
- Debugging Utils - kombu.async.debug
+ Event Loop - kombu.asynchronous
 ==========================================================
 
 .. contents::
     :local:
-.. currentmodule:: kombu.async.debug
+.. currentmodule:: kombu.asynchronous
 
-.. automodule:: kombu.async.debug
+.. automodule:: kombu.asynchronous
     :members:
     :undoc-members:

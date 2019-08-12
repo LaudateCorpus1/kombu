@@ -1,11 +1,11 @@
 ==========================================================
- Timer - kombu.async.timer
+ Event Loop Implementation - kombu.asynchronous.hub
 ==========================================================
 
 .. contents::
     :local:
-.. currentmodule:: kombu.async.timer
+.. currentmodule:: kombu.asynchronous.hub
 
-.. automodule:: kombu.async.timer
+.. automodule:: kombu.asynchronous.hub
     :members:
     :undoc-members:
