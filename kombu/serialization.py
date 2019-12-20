@@ -61,7 +61,33 @@ def _reraise_errors(wrapper,
 
 def pickle_loads(s, load=pickle_load):
     # used to support buffer objects
-    return load(BytesIO(s))
+    try:
+        return load(BytesIO(s))
+    except UnicodeDecodeError:
+        # UnicodeDecodeError is raised when the payload was created with the 2
+        #  protocol, so we decode it with bytes and then clean up to native
+        #  strings
+        decoded_py2 = load(BytesIO(s), encoding='bytes')
+
+        # using a function so we can recurse into any values that are dicts
+        def normalize_bytes(d):
+            if not isinstance(d, dict):
+                # This shouldn't happen, but let's be safe...
+                return d
+
+            out = {}
+            for k, v in d.items():
+                k = k.decode('utf-8') if isinstance(k, bytes) else k
+                v = v.decode('utf-8') if isinstance(v, bytes) else v
+
+                if isinstance(v, dict):
+                    v = normalize_bytes(v)
+
+                out[k] = v
+
+            return out
+
+        return normalize_bytes(decoded_py2)
 
 
 def parenthesize_alias(first, second):
