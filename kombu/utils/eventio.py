@@ -8,6 +8,7 @@ Evented IO support for multiple platforms.
 from __future__ import absolute_import
 
 import errno
+import math
 import select as __select__
 import socket
 
