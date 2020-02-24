@@ -8,6 +8,7 @@ Evented IO support for multiple platforms.
 from __future__ import absolute_import
 
 import errno
+import math
 import select as __select__
 import socket
 
@@ -26,6 +27,7 @@ ERR = POLL_ERR = 0x008 | 0x010
 
 _selectf = __select__.select
 _selecterr = __select__.error
+xpoll = getattr(__select__, 'poll', None)
 epoll = getattr(__select__, 'epoll', None)
 kqueue = getattr(__select__, 'kqueue', None)
 kevent = getattr(__select__, 'kevent', None)
@@ -50,6 +52,15 @@ KQ_NOTE_ATTRIB = getattr(__select__, 'KQ_NOTE_ATTRIB', 8)
 KQ_NOTE_LINK = getattr(__select__, 'KQ_NOTE_LINK', 16)
 KQ_NOTE_RENAME = getattr(__select__, 'KQ_NOTE_RENAME', 32)
 KQ_NOTE_REVOKE = getattr(__select__, 'kQ_NOTE_REVOKE', 64)
+POLLIN = getattr(__select__, 'POLLIN', 1)
+POLLOUT = getattr(__select__, 'POLLOUT', 4)
+POLLERR = getattr(__select__, 'POLLERR', 8)
+POLLHUP = getattr(__select__, 'POLLHUP', 16)
+POLLNVAL = getattr(__select__, 'POLLNVAL', 32)
+
+READ = POLL_READ = 0x001
+WRITE = POLL_WRITE = 0x004
+ERR = POLL_ERR = 0x008 | 0x010
 
 try:
     SELECT_BAD_FD = set((errno.EBADF, errno.WSAENOTSOCK))
@@ -176,6 +187,68 @@ class _kqueue(Poller):
         self._kqueue.close()
 
 
+class _poll(object):
+
+    def __init__(self):
+        self._poller = xpoll()
+        self._quick_poll = self._poller.poll
+        self._quick_register = self._poller.register
+        self._quick_unregister = self._poller.unregister
+
+    def register(self, fd, events):
+        fd = fileno(fd)
+        poll_flags = 0
+        if events & ERR:
+            poll_flags |= POLLERR
+        if events & WRITE:
+            poll_flags |= POLLOUT
+        if events & READ:
+            poll_flags |= POLLIN
+        self._quick_register(fd, poll_flags)
+        return fd
+
+    def unregister(self, fd):
+        try:
+            fd = fileno(fd)
+        except socket.error as exc:
+            # we don't know the previous fd of this object
+            # but it will be removed by the next poll iteration.
+            if getattr(exc, 'errno', None) in SELECT_BAD_FD:
+                return fd
+            raise
+        self._quick_unregister(fd)
+        return fd
+
+    def poll(self, timeout, round=math.ceil,
+             POLLIN=POLLIN, POLLOUT=POLLOUT, POLLERR=POLLERR,
+             READ=READ, WRITE=WRITE, ERR=ERR, Integral=Integral):
+        timeout = 0 if timeout and timeout < 0 else round((timeout or 0) * 1e3)
+        try:
+            event_list = self._quick_poll(timeout)
+        except (_selecterr, socket.error) as exc:
+            if getattr(exc, 'errno', None) == errno.EINTR:
+                return
+            raise
+
+        ready = []
+        for fd, event in event_list:
+            events = 0
+            if event & POLLIN:
+                events |= READ
+            if event & POLLOUT:
+                events |= WRITE
+            if event & POLLERR or event & POLLNVAL or event & POLLHUP:
+                events |= ERR
+            assert events
+            if not isinstance(fd, Integral):
+                fd = fd.fileno()
+            ready.append((fd, events))
+        return ready
+
+    def close(self):
+        self._poller = None
+
+
 class _select(Poller):
 
     def __init__(self):
@@ -247,17 +320,7 @@ class _select(Poller):
 
 
 def _get_poller():
-    if detect_environment() != 'default':
-        # greenlet
-        return _select
-    elif epoll:
-        # Py2.6+ Linux
-        return _epoll
-    elif kqueue:
-        # Py2.6+ on BSD / Darwin
-        return _select  # was: _kqueue
-    else:
-        return _select
+    return _poll
 
 
 def poll(*args, **kwargs):
