@@ -399,6 +399,7 @@ class Channel(virtual.Channel):
     socket_keepalive = None
     socket_keepalive_options = None
     max_connections = 10
+    connection_pool_timeout = 0
     #: Transport option to enable disable fanout keyprefix.
     #: Should be enabled by default, but that is not
     #: backwards compatible.  Can also be string, in which
@@ -432,6 +433,7 @@ class Channel(virtual.Channel):
          'socket_keepalive_options',
          'queue_order_strategy',
          'max_connections',
+         'connection_pool_timeout',
          'priority_steps')  # <-- do not add comma here!
     )
 
@@ -876,7 +878,11 @@ class Channel(virtual.Channel):
     def _get_pool(self, asynchronous=False):
         params = self._connparams(asynchronous=asynchronous)
         self.keyprefix_fanout = self.keyprefix_fanout.format(db=params['db'])
-        return redis.ConnectionPool(**params)
+        cls = redis.ConnectionPool
+        if self.connection_pool_timeout > 0:
+            cls = redis.BlockingConnectionPool
+            params['timeout'] = self.connection_pool_timeout
+        return cls(**params)
 
     def _get_async_client(self):
         if redis.VERSION < (2, 4, 4):
